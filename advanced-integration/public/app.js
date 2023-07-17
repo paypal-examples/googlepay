@@ -32,9 +32,14 @@ async function getGooglePayConfig(){
  * @returns {object} PaymentDataRequest fields
  */
 async function getGooglePaymentDataRequest() {
+  const {allowedPaymentMethods,merchantInfo, apiVersion, apiVersionMinor} = await getGooglePayConfig();
+  const baseRequest = {
+    apiVersion,
+    apiVersionMinor
+  }
+
   const paymentDataRequest = Object.assign({}, baseRequest);
-  const {allowedPaymentMethods,merchantInfo} = await getGooglePayConfig();
-  
+
   paymentDataRequest.allowedPaymentMethods = allowedPaymentMethods;
   paymentDataRequest.transactionInfo = getGoogleTransactionInfo();
   paymentDataRequest.merchantInfo =merchantInfo;
