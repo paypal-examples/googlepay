@@ -1,5 +1,5 @@
 name: Deploy
-run-name: ${{github.actor}} is deploying applepay test app 
+run-name: ${{github.actor}} is deploying googlepay test app 
 on:
   push:
     branches:
@@ -13,10 +13,10 @@ jobs:
       - uses: akhileshns/heroku-deploy@v3.7.8 # This is the action
         with:
           heroku_api_key: ${{secrets.HEROKU_API_KEY}} 
-          heroku_app_name: applepay-paypal-js-sdk # Must be unique in Heroku
+          heroku_app_name: googlepay-paypal-js-sdk # Must be unique in Heroku
           heroku_email: ${{secrets.HEROKU_EMAIL}}
           appdir: "advanced-integration"
-          healthcheck: "https://applepay-paypal-js-sdk.herokuapp.com/health"
+          healthpeak: "https://googlepay-paypal-js-sdk.herokuapp.com/health"
           usedocker: true
           dontuseforce: false
           docker_build_args: |

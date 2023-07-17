@@ -1,119 +1,316 @@
+/* eslint-disable no-useless-catch */
+/* eslint-disable no-unused-vars */
+/* eslint-disable no-undef */
+/**
+ * Define the version of the Google Pay API referenced when creating your
+ * configuration
+ *
+ * @see {@link https://developers.google.com/pay/api/web/reference/request-objects#PaymentDataRequest|apiVersion in PaymentDataRequest}
+ */
+const baseRequest = {
+  apiVersion: 2,
+  apiVersionMinor: 0
+};
 
-async function setupApplepay() {
-  const applepay = paypal.Applepay();
-    const {
-      isEligible,
-      countryCode,
-      currencyCode,
-      merchantCapabilities,
-      supportedNetworks,
-    } = await  applepay.config();
+/**
+ * An initialized google.payments.api.PaymentsClient object or null if not yet set
+ *
+ * @see {@link getGooglePaymentsClient}
+ */
+let paymentsClient = null, allowedPaymentMethods = null, merchantInfo = null;
 
-  if (!isEligible) {
-    throw new Error("applepay is not eligible");
-  }
-
-  document.getElementById("applepay-container").innerHTML =
-    '<apple-pay-button id="btn-appl" buttonstyle="black" type="buy" locale="en">';
-
-  document.getElementById("btn-appl").addEventListener("click", onClick);
-
-  async function onClick() {
-    console.log({ merchantCapabilities, currencyCode, supportedNetworks })
-
-    const paymentRequest = {
-      countryCode,
-      currencyCode: 'USD',
-      merchantCapabilities,
-      supportedNetworks,
-      requiredBillingContactFields: [
-        "name",
-        "phone",
-        "email",
-        "postalAddress",
-      ],
-      requiredShippingContactFields: [
-      ],
-      total: {
-        label: "Demo (Card is not charged)",
-        amount: "10.00",
-        type: "final",
-      },
-    };
-
-    // eslint-disable-next-line no-undef
-    let session = new ApplePaySession(4, paymentRequest);
-
-    session.onvalidatemerchant = (event) => {
-      applepay
-        .validateMerchant({
-          validationUrl: event.validationURL,
-        })
-        .then((payload) => {
-          session.completeMerchantValidation(payload.merchantSession);
-        })
-        .catch((err) => {
-          console.error(err);
-          session.abort();
-        });
-    };
-
-    session.onpaymentmethodselected = () => {
-      session.completePaymentMethodSelection({
-        newTotal: paymentRequest.total,
-      });
-    };
-
-    session.onpaymentauthorized = async (event) => {
-      try {
-        /* Create Order on the Server Side */
-        const orderResponse = await fetch(`/api/orders`,{
-          method:'POST',
-          headers : {
-            'Content-Type': 'application/json'
-          }
-        })
-        if(!orderResponse.ok) {
-            throw new Error("error creating order")
-        }
-
-        const { id } = await orderResponse.json()
-        console.log({ id })
-        /**
-         * Confirm Payment 
-         */
-        await applepay.confirmOrder({ orderId: id, token: event.payment.token, billingContact: event.payment.billingContact , shippingContact: event.payment.shippingContact });
-
-        /*
-        * Capture order (must currently be made on server)
-        */
-        await fetch(`/api/orders/${id}/capture`, {
-          method: 'POST',
-        });
-
-        session.completePayment({
-          status: window.ApplePaySession.STATUS_SUCCESS,
-        });
-      } catch (err) {
-        console.error(err);
-        session.completePayment({
-          status: window.ApplePaySession.STATUS_FAILURE,
-        });
-      }
-    };
-
-    session.oncancel  = () => {
-      console.log("Apple Pay Cancelled !!")
+/**
+ * Configure your site's support for payment methods supported by the Google Pay
+ * API.
+ *
+ * Each member of allowedPaymentMethods should contain only the required fields,
+ * allowing reuse of this base request when determining a viewer's ability
+ * to pay and later requesting a supported payment method
+ *
+ * @returns {object} Google Pay API version, payment methods supported by the site
+ */
+function getGoogleIsReadyToPayRequest(allowedPaymentMethods) {
+  return Object.assign({},
+    baseRequest, {
+      allowedPaymentMethods: allowedPaymentMethods
     }
+  );
+}
 
-    session.begin();
+/**
+ * 
+ * @returns Fetch the Google Pay Config From PayPal 
+ */
+async function getGooglePayConfig(){
+  if(allowedPaymentMethods == null || merchantInfo == null){
+    const googlePayConfig = await paypal.Googlepay().config();
+    console.log(" ===== Google Pay Config Fetched ===== ");
+    allowedPaymentMethods = googlePayConfig.allowedPaymentMethods;
+    merchantInfo = googlePayConfig.merchantInfo;
+  }
+  return {
+    allowedPaymentMethods,
+    merchantInfo
   }
 }
 
-document.addEventListener("DOMContentLoaded", () => {
+/**
+ * Configure support for the Google Pay API
+ *
+ * @see {@link https://developers.google.com/pay/api/web/reference/request-objects#PaymentDataRequest|PaymentDataRequest}
+ * @returns {object} PaymentDataRequest fields
+ */
+async function getGooglePaymentDataRequest() {
+  const paymentDataRequest = Object.assign({}, baseRequest);
+  const {allowedPaymentMethods,merchantInfo} = await getGooglePayConfig();
+  
+  paymentDataRequest.allowedPaymentMethods = allowedPaymentMethods;
+  paymentDataRequest.transactionInfo = getGoogleTransactionInfo();
+  paymentDataRequest.merchantInfo =merchantInfo;
 
-  // eslint-disable-next-line no-undef
-  if(ApplePaySession?.supportsVersion(4) && ApplePaySession?.canMakePayments()) {
-    setupApplepay().catch(console.error);
+  paymentDataRequest.callbackIntents = ["PAYMENT_AUTHORIZATION"];
+
+  return paymentDataRequest;
+}
+
+  /**
+ * Handles authorize payments callback intents.
+ *
+ * @param {object} paymentData response from Google Pay API after a payer approves payment through user gesture.
+ * @see {@link https://developers.google.com/pay/api/web/reference/response-objects#PaymentData object reference}
+ *
+ * @see {@link https://developers.google.com/pay/api/web/reference/response-objects#PaymentAuthorizationResult}
+ * @returns Promise<{object}> Promise of PaymentAuthorizationResult object to acknowledge the payment authorization status.
+ */
+  function onPaymentAuthorized(paymentData) {
+    return new Promise(function(resolve, reject) {
+      // handle the response
+      processPayment(paymentData)
+        .then(function(data) {
+          resolve({transactionState: 'SUCCESS'});
+        })
+        .catch(function(errDetails) {
+          resolve({transactionState: 'ERROR'});
+        });
+    });
   }
-});
+  
+
+/**
+ * Return an active PaymentsClient or initialize
+ *
+ * @see {@link https://developers.google.com/pay/api/web/reference/client#PaymentsClient|PaymentsClient constructor}
+ * @returns {google.payments.api.PaymentsClient} Google Pay API client
+ */
+function getGooglePaymentsClient() {
+  if (paymentsClient === null) {
+    paymentsClient = new google.payments.api.PaymentsClient({
+      environment: 'TEST',
+      paymentDataCallbacks: {
+        onPaymentAuthorized: onPaymentAuthorized
+      }
+    });
+  }
+  return paymentsClient;
+}
+
+
+
+
+/**
+ * Initialize Google PaymentsClient after Google-hosted JavaScript has loaded
+ *
+ * Display a Google Pay payment button after confirmation of the viewer's
+ * ability to pay.
+ */
+async function onGooglePayLoaded() {
+  const paymentsClient = getGooglePaymentsClient();
+  const { allowedPaymentMethods } = await getGooglePayConfig();
+
+  paymentsClient.isReadyToPay(getGoogleIsReadyToPayRequest(allowedPaymentMethods))
+    .then(function(response) {
+      if (response.result) {
+        addGooglePayButton();
+      }
+    })
+    .catch(function(err) {
+      // show error in developer console for debugging
+      console.error(err);
+    });
+}
+
+/**
+ * Add a Google Pay purchase button alongside an existing checkout button
+ *
+ * @see {@link https://developers.google.com/pay/api/web/reference/request-objects#ButtonOptions|Button options}
+ * @see {@link https://developers.google.com/pay/api/web/guides/brand-guidelines|Google Pay brand guidelines}
+ */
+function addGooglePayButton() {
+  const paymentsClient = getGooglePaymentsClient();
+  const button =
+    paymentsClient.createButton({
+      onClick: onGooglePaymentButtonClicked
+    });
+  document.getElementById('container').appendChild(button);
+}
+
+/**
+ * Provide Google Pay API with a payment amount, currency, and amount status
+ *
+ * @see {@link https://developers.google.com/pay/api/web/reference/request-objects#TransactionInfo|TransactionInfo}
+ * @returns {object} transaction info, suitable for use as transactionInfo property of PaymentDataRequest
+ */
+function getGoogleTransactionInfo() {
+  return {
+    displayItems: [{
+        label: "Subtotal",
+        type: "SUBTOTAL",
+        price: "100.00",
+      },
+      {
+        label: "Tax",
+        type: "TAX",
+        price: "10.00",
+      }
+    ],
+    countryCode: 'US',
+    currencyCode: "USD",
+    totalPriceStatus: "FINAL",
+    totalPrice: "110.00",
+    totalPriceLabel: "Total"
+  };
+}
+
+
+/**
+ * Show Google Pay payment sheet when Google Pay payment button is clicked
+ */
+async function onGooglePaymentButtonClicked() {
+  const paymentDataRequest = await getGooglePaymentDataRequest();
+  paymentDataRequest.transactionInfo = getGoogleTransactionInfo();
+
+  const paymentsClient = getGooglePaymentsClient();
+  paymentsClient.loadPaymentData(paymentDataRequest);
+}
+
+let attempts = 0;
+/**
+ * Process payment data returned by the Google Pay API
+ *
+ * @param {object} paymentData response from Google Pay API after user approves payment
+ * @see {@link https://developers.google.com/pay/api/web/reference/response-objects#PaymentData|PaymentData object reference}
+ */
+async function processPayment(paymentData) {
+  const resultElement = document.getElementById("result");
+  var modal = document.getElementById("resultModal");
+  resultElement.innerHTML = ""
+  try {
+    console.log(" ===== Payment Authorized ===== ");
+    const {currencyCode, totalPrice} = getGoogleTransactionInfo() 
+      /*
+      * Create order (can be made on server)
+      */
+  const order = {
+    intent: "CAPTURE",
+    purchase_units: [
+      {
+        amount: {
+          currency_code: currencyCode,
+          value: totalPrice,
+        }, 
+        payee: {
+          merchant_id:'62YP6V8XE6V8L'
+      },
+    }
+    ],
+    payment_source:{
+      google_pay:{
+        attributes:{
+          verification: {
+            method: 'SCA_WHEN_REQUIRED',
+          },
+        }
+      }
+    }
+  };
+
+  const { id } = await fetch(`/orders`,{
+    method:'POST',
+    headers : {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(order)
+  }).then((res) => res.json());
+
+  console.log(" ===== Order Created ===== ");
+  /** Approve Payment */
+
+  const {status} = await paypal.Googlepay().confirmOrder({
+    orderId: id,
+    paymentMethodData: paymentData.paymentMethodData
+  });
+
+    if(status === 'PAYER_ACTION_REQUIRED'){
+          console.log(" ===== Confirm Payment Completed Payer Action Required ===== ")
+          paypal.Googlepay().intiatePayerAction({orderId: id}).then( async () => {
+
+                /**
+                 *  GET Order 
+                 */
+                const orderResponse = await fetch(`/orders/${id}`, {
+                  method: "GET"
+                }).then(res =>res.json())
+
+                console.log(" ===== 3DS Contingency Result Fetched ===== ");
+                console.log(orderResponse?.payment_source?.google_pay?.card?.authentication_result)
+                /*
+                 * CAPTURE THE ORDER
+                 */
+                console.log(" ===== Payer Action Completed ===== ")
+
+                modal.style.display = "block";
+                resultElement.classList.add("spinner");
+                const captureResponse = await fetch(`/orders/${id}/capture`, {
+                  method: "POST"
+                }).then(res =>res.json())
+
+                console.log(" ===== Order Capture Completed ===== ")
+                resultElement.classList.remove("spinner");
+                resultElement.innerHTML = prettyPrintJson.toHtml(captureResponse,{
+                  indent: 2
+                });
+                
+
+          })
+    } else {
+        /*
+         * CAPTURE THE ORDER
+         */
+        
+        const response = await fetch(`/orders/${id}/capture`, {
+                  method: "POST"
+        }).then(res =>res.json())
+
+        console.log(" ===== Order Capture Completed ===== ")
+        modal.style.display = "block";
+        resultElement.innerHTML = prettyPrintJson.toHtml(response,{
+          indent: 2
+        });
+        
+    }
+
+
+  console.log(" ===== Confirm Order Call Completed ===== ")
+
+  return { transactionState: 'SUCCESS' }
+
+
+} catch(err){
+  return {
+    transactionState: 'ERROR',
+    error: {
+      message: err.message
+    }
+  }
+}
+}

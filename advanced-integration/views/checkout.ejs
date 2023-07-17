@@ -23,16 +23,16 @@
         padding: 20px;
       }
 
-      #applepay-container {
+      #googlepay-container {
         flex-grow: 1;
       }
     </style>
 
     <!-- Include Apple SDK Script -->
     <script src="https://applepay.cdn-apple.com/jsapi/v1/apple-pay-sdk.js"></script>
-    <!-- Include PayPal SDK Script with components=applepay for Custom Applepay Component-->
+    <!-- Include PayPal SDK Script with components=applepay for Custom Googlepay Component-->
     <script
-      src="https://www.paypal.com/sdk/js?components=applepay&client-id=<%= clientId %>&merchant-id=<%= merchantId %>"
+      src="https://www.paypal.com/sdk/js?components=googlepay&client-id=<%= clientId %>&merchant-id=<%= merchantId %>"
       data-client-token="<%= clientToken %>" data-partner-attribution-id="APPLEPAY"
     ></script>
 
@@ -43,15 +43,46 @@
     crossorigin="anonymous"
   />
 
+  <link rel=stylesheet href=https://cdn.jsdelivr.net/npm/pretty-print-json@1.4/dist/css/pretty-print-json.css>
+  <script src=https://cdn.jsdelivr.net/npm/pretty-print-json@1.3/dist/pretty-print-json.min.js></script>
+
+  <script async src="https://pay.google.com/gp/p/js/pay.js"></script>
+
+
   </head>
   <body>
-    <div class="container">
-      <h3>Sample Applepay Integration</h3>
-      <h6>Basic Integration (no amount breakdown / no shipping)</h6>
-      <div id="applepay-container"></div>
+    <main>
+      <section> 
+        <h4>Direct Merchant Integration</h4>
+        <div id="container"></div>
+      </section>
+      
+      <!-- Result Modal -->
+      <div id="resultModal" class="modal">
+        <span onclick="document.getElementById('resultModal').style.display='none'" class="close" title="Close Modal">&times;</span>
+        <form class="modal-content">
+          <div class="modalContainer">
+            <span class="modalHeader">Capture Order Result</span>
+            <pre id=result class=json-container></pre>
+            <!-- <div class="clearfix">
+              <button type="button" class="cancelbtn" onclick="document.getElementById('resultModal').style.display='none'">Close</button>
+              <button type="button" class="deletebtn">Refund</button>
+            </div> -->
+          </div>
+        </form>
+      </div>
+            
+    </main>
 
-      <div><i> You wont be charged any money. Try with Apple Pay Test Cards on Sandbox. You can find them <a target="_blank" href="https://developer.apple.com/apple-pay/sandbox-testing/">here</a></i></div>
-    </div>
-    <script src="app.js"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", (event) => {
+        if (google && paypal.Googlepay) {
+          onGooglePayLoaded().catch(console.log);
+        }
+      });
+    </script>
+    <script src="./modal.js"></script>
+    <script src="./app.js"></script>
   </body>
 </html>
+
