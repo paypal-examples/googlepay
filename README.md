@@ -1,4 +1,4 @@
-# PayPal ApplepPay Example Code
+# PayPal Googlepay Example Code
 
 Examples from the official [PayPal Developer Docs](https://developer.paypal.com/).
 
@@ -7,9 +7,9 @@ Examples from the official [PayPal Developer Docs](https://developer.paypal.com/
 This repository contains two directories:
 
 - [Standard integration](./standard-integration/)
-  - Set up simple Applepay payment method on your checkout page for your buyers.
+  - Set up simple Googlepay payment method on your checkout page for your buyers.
 - [Advanced integration](./advanced-integration/)
-  - Build and customize Applepay Integration with the custom Applepay Component
+  - Build and customize Googlepay Integration with the custom Applepay Component
 
 **Not sure where to start?** Choose the [standard integration](./standard-integration/).
 
