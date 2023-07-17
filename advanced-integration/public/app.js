@@ -1,16 +1,4 @@
-/* eslint-disable no-useless-catch */
-/* eslint-disable no-unused-vars */
-/* eslint-disable no-undef */
-/**
- * Define the version of the Google Pay API referenced when creating your
- * configuration
- *
- * @see {@link https://developers.google.com/pay/api/web/reference/request-objects#PaymentDataRequest|apiVersion in PaymentDataRequest}
- */
-const baseRequest = {
-  apiVersion: 2,
-  apiVersionMinor: 0
-};
+
 
 /**
  * An initialized google.payments.api.PaymentsClient object or null if not yet set
@@ -19,23 +7,6 @@ const baseRequest = {
  */
 let paymentsClient = null, allowedPaymentMethods = null, merchantInfo = null;
 
-/**
- * Configure your site's support for payment methods supported by the Google Pay
- * API.
- *
- * Each member of allowedPaymentMethods should contain only the required fields,
- * allowing reuse of this base request when determining a viewer's ability
- * to pay and later requesting a supported payment method
- *
- * @returns {object} Google Pay API version, payment methods supported by the site
- */
-function getGoogleIsReadyToPayRequest(allowedPaymentMethods) {
-  return Object.assign({},
-    baseRequest, {
-      allowedPaymentMethods: allowedPaymentMethods
-    }
-  );
-}
 
 /**
  * 
@@ -125,9 +96,8 @@ function getGooglePaymentsClient() {
  */
 async function onGooglePayLoaded() {
   const paymentsClient = getGooglePaymentsClient();
-  const { allowedPaymentMethods } = await getGooglePayConfig();
-
-  paymentsClient.isReadyToPay(getGoogleIsReadyToPayRequest(allowedPaymentMethods))
+  const { allowedPaymentMethods, apiVersion, apiVersionMinor } = await getGooglePayConfig();
+  paymentsClient.isReadyToPay({allowedPaymentMethods, apiVersion,apiVersionMinor})
     .then(function(response) {
       if (response.result) {
         addGooglePayButton();
@@ -160,7 +130,7 @@ function addGooglePayButton() {
  * @see {@link https://developers.google.com/pay/api/web/reference/request-objects#TransactionInfo|TransactionInfo}
  * @returns {object} transaction info, suitable for use as transactionInfo property of PaymentDataRequest
  */
-function getGoogleTransactionInfo() {
+function getGoogleTransactionInfo(countryCode) {
   return {
     displayItems: [{
         label: "Subtotal",
@@ -173,7 +143,7 @@ function getGoogleTransactionInfo() {
         price: "1.00",
       }
     ],
-    countryCode: 'US',
+    countryCode: countryCode,
     currencyCode: "USD",
     totalPriceStatus: "FINAL",
     totalPrice: "11.00",
@@ -187,13 +157,13 @@ function getGoogleTransactionInfo() {
  */
 async function onGooglePaymentButtonClicked() {
   const paymentDataRequest = await getGooglePaymentDataRequest();
-  paymentDataRequest.transactionInfo = getGoogleTransactionInfo();
+  const { countryCode } = await getGooglePayConfig();
+  paymentDataRequest.transactionInfo = getGoogleTransactionInfo(countryCode);
 
   const paymentsClient = getGooglePaymentsClient();
   paymentsClient.loadPaymentData(paymentDataRequest);
 }
 
-let attempts = 0;
 /**
  * Process payment data returned by the Google Pay API
  *
@@ -207,7 +177,6 @@ async function processPayment(paymentData) {
   try {
     console.log(" ===== Payment Authorized ===== ");
   
-
     const { id } = await fetch(`/api/orders`,{
       method:'POST',
       headers : {
