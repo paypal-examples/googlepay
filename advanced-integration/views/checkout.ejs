@@ -28,12 +28,12 @@
       }
     </style>
 
-    <!-- Include Apple SDK Script -->
-    <script src="https://applepay.cdn-apple.com/jsapi/v1/apple-pay-sdk.js"></script>
-    <!-- Include PayPal SDK Script with components=applepay for Custom Googlepay Component-->
+    <!-- Include Google SDK Script -->
+    <script src="https://pay.google.com/gp/p/js/pay.js"></script>
+    <!-- Include PayPal SDK Script with components=googlepay for Custom Googlepay Component-->
     <script
       src="https://www.paypal.com/sdk/js?components=googlepay&client-id=<%= clientId %>&merchant-id=<%= merchantId %>"
-      data-client-token="<%= clientToken %>" data-partner-attribution-id="APPLEPAY"
+      data-client-token="<%= clientToken %>" data-partner-attribution-id="GOOGLEPAY"
     ></script>
 
     <link
@@ -46,7 +46,7 @@
   <link rel=stylesheet href=https://cdn.jsdelivr.net/npm/pretty-print-json@1.4/dist/css/pretty-print-json.css>
   <script src=https://cdn.jsdelivr.net/npm/pretty-print-json@1.3/dist/pretty-print-json.min.js></script>
 
-  <script async src="https://pay.google.com/gp/p/js/pay.js"></script>
+  
 
 
   </head>
