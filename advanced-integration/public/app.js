@@ -5,7 +5,7 @@
  *
  * @see {@link getGooglePaymentsClient}
  */
-let paymentsClient = null, allowedPaymentMethods = null, merchantInfo = null;
+let paymentsClient = null, googlepayConfig = null;
 
 
 /**
@@ -13,16 +13,12 @@ let paymentsClient = null, allowedPaymentMethods = null, merchantInfo = null;
  * @returns Fetch the Google Pay Config From PayPal 
  */
 async function getGooglePayConfig(){
-  if(allowedPaymentMethods == null || merchantInfo == null){
-    const googlePayConfig = await paypal.Googlepay().config();
+  if(googlepayConfig === null){
+    googlepayConfig = await paypal.Googlepay().config();
     console.log(" ===== Google Pay Config Fetched ===== ");
-    allowedPaymentMethods = googlePayConfig.allowedPaymentMethods;
-    merchantInfo = googlePayConfig.merchantInfo;
+
   }
-  return {
-    allowedPaymentMethods,
-    merchantInfo
-  }
+  return googlepayConfig;
 }
 
 /**
