@@ -6,7 +6,7 @@ const base = "https://api-m.sandbox.paypal.com";
 
 // call the create order method
 export async function createOrder() {
-  const purchaseAmount = "10.00"; // TODO: pull prices from a database
+  const purchaseAmount = "11.00"; // TODO: pull prices from a database
   const accessToken = await generateAccessToken();
   const url = `${base}/v2/checkout/orders`;
   const response = await fetch(url, {
@@ -28,6 +28,15 @@ export async function createOrder() {
           }
         },
       ],
+      payment_source: {
+        google_pay:{
+          attributes:{
+            verification: {
+              method: 'SCA_WHEN_REQUIRED',
+            },
+          }
+        }
+      }
     }),
   });
 
@@ -86,4 +95,18 @@ async function handleResponse(response) {
 
   const errorMessage = await response.text();
   throw new Error(errorMessage);
+}
+
+export async function getOrder(orderId) {
+  const accessToken = await generateAccessToken();
+  const url = `${base}/v2/checkout/orders/${orderId}`;
+  const response = await fetch(url, {
+    method: "get",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${accessToken}`,
+    },
+  });
+
+  return handleResponse(response);
 }

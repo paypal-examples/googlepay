@@ -165,18 +165,18 @@ function getGoogleTransactionInfo() {
     displayItems: [{
         label: "Subtotal",
         type: "SUBTOTAL",
-        price: "100.00",
+        price: "10.00",
       },
       {
         label: "Tax",
         type: "TAX",
-        price: "10.00",
+        price: "1.00",
       }
     ],
     countryCode: 'US',
     currencyCode: "USD",
     totalPriceStatus: "FINAL",
-    totalPrice: "110.00",
+    totalPrice: "11.00",
     totalPriceLabel: "Total"
   };
 }
@@ -202,45 +202,18 @@ let attempts = 0;
  */
 async function processPayment(paymentData) {
   const resultElement = document.getElementById("result");
-  var modal = document.getElementById("resultModal");
+  const modal = document.getElementById("resultModal");
   resultElement.innerHTML = ""
   try {
     console.log(" ===== Payment Authorized ===== ");
-    const {currencyCode, totalPrice} = getGoogleTransactionInfo() 
-      /*
-      * Create order (can be made on server)
-      */
-  const order = {
-    intent: "CAPTURE",
-    purchase_units: [
-      {
-        amount: {
-          currency_code: currencyCode,
-          value: totalPrice,
-        }, 
-        payee: {
-          merchant_id:'62YP6V8XE6V8L'
-      },
-    }
-    ],
-    payment_source:{
-      google_pay:{
-        attributes:{
-          verification: {
-            method: 'SCA_WHEN_REQUIRED',
-          },
-        }
-      }
-    }
-  };
+  
 
-  const { id } = await fetch(`/orders`,{
-    method:'POST',
-    headers : {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(order)
-  }).then((res) => res.json());
+    const { id } = await fetch(`/api/orders`,{
+      method:'POST',
+      headers : {
+        'Content-Type': 'application/json'
+      }
+    }).then((res) => res.json());
 
   console.log(" ===== Order Created ===== ");
   /** Approve Payment */
@@ -252,12 +225,12 @@ async function processPayment(paymentData) {
 
     if(status === 'PAYER_ACTION_REQUIRED'){
           console.log(" ===== Confirm Payment Completed Payer Action Required ===== ")
-          paypal.Googlepay().intiatePayerAction({orderId: id}).then( async () => {
+          paypal.Googlepay().initiatePayerAction({orderId: id}).then( async () => {
 
                 /**
                  *  GET Order 
                  */
-                const orderResponse = await fetch(`/orders/${id}`, {
+                const orderResponse = await fetch(`/api/orders/${id}`, {
                   method: "GET"
                 }).then(res =>res.json())
 
@@ -270,7 +243,7 @@ async function processPayment(paymentData) {
 
                 modal.style.display = "block";
                 resultElement.classList.add("spinner");
-                const captureResponse = await fetch(`/orders/${id}/capture`, {
+                const captureResponse = await fetch(`/api/orders/${id}/capture`, {
                   method: "POST"
                 }).then(res =>res.json())
 
@@ -287,7 +260,7 @@ async function processPayment(paymentData) {
          * CAPTURE THE ORDER
          */
         
-        const response = await fetch(`/orders/${id}/capture`, {
+        const response = await fetch(`/api/orders/${id}/capture`, {
                   method: "POST"
         }).then(res =>res.json())
 

@@ -28,6 +28,17 @@ app.post("/api/orders", async (req, res) => {
   }
 });
 
+// Get order
+app.post("/api/orders/:orderID", async (req, res) => {
+  const { orderID } = req.params;
+  try {
+    const order = await paypal.getOrder(orderID);
+    res.json(order);
+  } catch (err) {
+    res.status(500).send(err.message);
+  }
+});
+
 // capture payment
 app.post("/api/orders/:orderID/capture", async (req, res) => {
   const { orderID } = req.params;
