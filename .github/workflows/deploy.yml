@@ -26,7 +26,7 @@ jobs:
             CLIENT_SECRET
             MERCHANT_ID
         env:
-          NODE_ENV: staging
+          NODE_ENV: ${{secrets.NODE_ENV}}
           CLIENT_ID: ${{secrets.CLIENT_ID}}
           APP_SECRET: ${{secrets.APP_SECRET}}
           CLIENT_SECRET: ${{secrets.CLIENT_SECRET}}
