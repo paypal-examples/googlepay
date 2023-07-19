@@ -1,7 +1,10 @@
+/* eslint-disable no-undef */
+/* eslint-disable no-unused-vars */
 
 
 /**
  * An initialized google.payments.api.PaymentsClient object or null if not yet set
+ * An initialized paypal.Googlepay().config() response object or null if not yet set
  *
  * @see {@link getGooglePaymentsClient}
  */
@@ -33,7 +36,6 @@ async function getGooglePaymentDataRequest() {
     apiVersion,
     apiVersionMinor
   }
-
   const paymentDataRequest = Object.assign({}, baseRequest);
 
   paymentDataRequest.allowedPaymentMethods = allowedPaymentMethods;
@@ -56,12 +58,11 @@ async function getGooglePaymentDataRequest() {
  */
   function onPaymentAuthorized(paymentData) {
     return new Promise(function(resolve, reject) {
-      // handle the response
       processPayment(paymentData)
-        .then(function(data) {
+        .then(function() {
           resolve({transactionState: 'SUCCESS'});
         })
-        .catch(function(errDetails) {
+        .catch(function() {
           resolve({transactionState: 'ERROR'});
         });
     });
@@ -77,7 +78,7 @@ async function getGooglePaymentDataRequest() {
 function getGooglePaymentsClient() {
   if (paymentsClient === null) {
     paymentsClient = new google.payments.api.PaymentsClient({
-      environment: 'TEST',
+      environment: 'PRODUCTION',
       paymentDataCallbacks: {
         onPaymentAuthorized: onPaymentAuthorized
       }
@@ -136,18 +137,18 @@ function getGoogleTransactionInfo(countryCode) {
     displayItems: [{
         label: "Subtotal",
         type: "SUBTOTAL",
-        price: "10.00",
+        price: "0.09",
       },
       {
         label: "Tax",
         type: "TAX",
-        price: "1.00",
+        price: "0.01",
       }
     ],
     countryCode: countryCode,
     currencyCode: "USD",
     totalPriceStatus: "FINAL",
-    totalPrice: "11.00",
+    totalPrice: "0.10",
     totalPriceLabel: "Total"
   };
 }
@@ -175,9 +176,7 @@ async function processPayment(paymentData) {
   const resultElement = document.getElementById("result");
   const modal = document.getElementById("resultModal");
   resultElement.innerHTML = ""
-  try {
-    console.log(" ===== Payment Authorized ===== ");
-  
+  try {  
     const { id } = await fetch(`/api/orders`,{
       method:'POST',
       headers : {
@@ -211,17 +210,18 @@ async function processPayment(paymentData) {
                  */
                 console.log(" ===== Payer Action Completed ===== ")
 
-                modal.style.display = "block";
-                resultElement.classList.add("spinner");
-                const captureResponse = await fetch(`/api/orders/${id}/capture`, {
-                  method: "POST"
-                }).then(res =>res.json())
+                // Disabling Capture Order for Production Testing
+                // modal.style.display = "block";
+                // resultElement.classList.add("spinner");
+                // const captureResponse = await fetch(`/api/orders/${id}/capture`, {
+                //   method: "POST"
+                // }).then(res =>res.json())
 
-                console.log(" ===== Order Capture Completed ===== ")
-                resultElement.classList.remove("spinner");
-                resultElement.innerHTML = prettyPrintJson.toHtml(captureResponse,{
-                  indent: 2
-                });
+                // console.log(" ===== Order Capture Completed ===== ")
+                // resultElement.classList.remove("spinner");
+                // resultElement.innerHTML = prettyPrintJson.toHtml(captureResponse,{
+                //   indent: 2
+                // });
                 
 
           })
@@ -230,20 +230,18 @@ async function processPayment(paymentData) {
          * CAPTURE THE ORDER
          */
         
-        const response = await fetch(`/api/orders/${id}/capture`, {
-                  method: "POST"
-        }).then(res =>res.json())
+        // Disabling Capture Order for Production Testing
+        // const response = await fetch(`/api/orders/${id}/capture`, {
+        //           method: "POST"
+        // }).then(res =>res.json())
 
-        console.log(" ===== Order Capture Completed ===== ")
-        modal.style.display = "block";
-        resultElement.innerHTML = prettyPrintJson.toHtml(response,{
-          indent: 2
-        });
+        // console.log(" ===== Order Capture Completed ===== ")
+        // modal.style.display = "block";
+        // resultElement.innerHTML = prettyPrintJson.toHtml(response,{
+        //   indent: 2
+        // });
         
     }
-
-
-  console.log(" ===== Confirm Order Call Completed ===== ")
 
   return { transactionState: 'SUCCESS' }
 
