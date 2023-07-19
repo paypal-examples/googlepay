@@ -4,14 +4,11 @@ Examples from the official [PayPal Developer Docs](https://developer.paypal.com/
 
 ## Introduction and Overview
 
-This repository contains two directories:
+This repository contains the following directory:
 
-- [Standard integration](./standard-integration/)
-  - Set up simple Googlepay payment method on your checkout page for your buyers.
 - [Advanced integration](./advanced-integration/)
   - Build and customize Googlepay Integration with the custom Applepay Component
 
-**Not sure where to start?** Choose the [standard integration](./standard-integration/).
 
 ### The PayPal JavaScript SDK
 
