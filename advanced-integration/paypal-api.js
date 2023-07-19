@@ -3,7 +3,7 @@ import fetch from "node-fetch";
 // set some important variables
 const { CLIENT_ID, APP_SECRET, MERCHANT_ID , BASE_URL } = process.env;
 // const sandbox = "https://api-m.sandbox.paypal.com";
-// const prod = "https://api-m.paypal.com";
+// const production = "https://api-m.paypal.com";
 const base = `${BASE_URL}`
 
 // call the create order method
