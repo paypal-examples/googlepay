@@ -78,7 +78,7 @@ async function getGooglePaymentDataRequest() {
 function getGooglePaymentsClient() {
   if (paymentsClient === null) {
     paymentsClient = new google.payments.api.PaymentsClient({
-      environment: 'PRODUCTION',
+      environment: 'TEST',
       paymentDataCallbacks: {
         onPaymentAuthorized: onPaymentAuthorized
       }
@@ -210,18 +210,17 @@ async function processPayment(paymentData) {
                  */
                 console.log(" ===== Payer Action Completed ===== ")
 
-                // Disabling Capture Order for Production Testing
-                // modal.style.display = "block";
-                // resultElement.classList.add("spinner");
-                // const captureResponse = await fetch(`/api/orders/${id}/capture`, {
-                //   method: "POST"
-                // }).then(res =>res.json())
+                modal.style.display = "block";
+                resultElement.classList.add("spinner");
+                const captureResponse = await fetch(`/api/orders/${id}/capture`, {
+                  method: "POST"
+                }).then(res =>res.json())
 
-                // console.log(" ===== Order Capture Completed ===== ")
-                // resultElement.classList.remove("spinner");
-                // resultElement.innerHTML = prettyPrintJson.toHtml(captureResponse,{
-                //   indent: 2
-                // });
+                console.log(" ===== Order Capture Completed ===== ")
+                resultElement.classList.remove("spinner");
+                resultElement.innerHTML = prettyPrintJson.toHtml(captureResponse,{
+                  indent: 2
+                });
                 
 
           })
@@ -230,16 +229,15 @@ async function processPayment(paymentData) {
          * CAPTURE THE ORDER
          */
         
-        // Disabling Capture Order for Production Testing
-        // const response = await fetch(`/api/orders/${id}/capture`, {
-        //           method: "POST"
-        // }).then(res =>res.json())
+        const response = await fetch(`/api/orders/${id}/capture`, {
+                  method: "POST"
+        }).then(res =>res.json())
 
-        // console.log(" ===== Order Capture Completed ===== ")
-        // modal.style.display = "block";
-        // resultElement.innerHTML = prettyPrintJson.toHtml(response,{
-        //   indent: 2
-        // });
+        console.log(" ===== Order Capture Completed ===== ")
+        modal.style.display = "block";
+        resultElement.innerHTML = prettyPrintJson.toHtml(response,{
+          indent: 2
+        });
         
     }
 
