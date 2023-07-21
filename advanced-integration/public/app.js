@@ -31,7 +31,7 @@ async function getGooglePayConfig(){
  * @returns {object} PaymentDataRequest fields
  */
 async function getGooglePaymentDataRequest() {
-  const {allowedPaymentMethods,merchantInfo, apiVersion, apiVersionMinor} = await getGooglePayConfig();
+  const {allowedPaymentMethods,merchantInfo, apiVersion, apiVersionMinor , countryCode} = await getGooglePayConfig();
   const baseRequest = {
     apiVersion,
     apiVersionMinor
@@ -39,7 +39,7 @@ async function getGooglePaymentDataRequest() {
   const paymentDataRequest = Object.assign({}, baseRequest);
 
   paymentDataRequest.allowedPaymentMethods = allowedPaymentMethods;
-  paymentDataRequest.transactionInfo = getGoogleTransactionInfo();
+  paymentDataRequest.transactionInfo = getGoogleTransactionInfo(countryCode);
   paymentDataRequest.merchantInfo =merchantInfo;
 
   paymentDataRequest.callbackIntents = ["PAYMENT_AUTHORIZATION"];
@@ -159,9 +159,6 @@ function getGoogleTransactionInfo(countryCode) {
  */
 async function onGooglePaymentButtonClicked() {
   const paymentDataRequest = await getGooglePaymentDataRequest();
-  const { countryCode } = await getGooglePayConfig();
-  paymentDataRequest.transactionInfo = getGoogleTransactionInfo(countryCode);
-
   const paymentsClient = getGooglePaymentsClient();
   paymentsClient.loadPaymentData(paymentDataRequest);
 }
