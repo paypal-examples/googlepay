@@ -5,7 +5,7 @@
     "image": "mcr.microsoft.com/devcontainers/javascript-node:20",
     "postCreateCommand": "cd advanced-integration && npm install",
     "postAttachCommand": {
-      "Start server": "CI=true npx kill-port --yes 8888 && npm start"
+      "Start server": "cd advanced-integration && CI=true npx kill-port --yes 8888 && npm start"
     },
     "forwardPorts": [
       8888
