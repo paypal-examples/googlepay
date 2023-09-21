@@ -7,7 +7,7 @@ Examples from the official [PayPal Developer Docs](https://developer.paypal.com/
 This repository contains the following directory:
 
 - [Advanced integration](./advanced-integration/)
-  - Build and customize Googlepay Integration with the custom Applepay Component
+  - Build and customize Googlepay Integration with the custom Googlepay Component
 
 
 ### The PayPal JavaScript SDK
