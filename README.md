@@ -7,7 +7,7 @@ Examples from the official [PayPal Developer Docs](https://developer.paypal.com/
 This repository contains the following directory:
 
 - [Advanced integration](./advanced-integration/)
-  - Build and customize Googlepay Integration with the custom Applepay Component
+  - Build and customize Googlepay Integration with the custom Googlepay Component
 
 
 ### The PayPal JavaScript SDK
@@ -36,3 +36,20 @@ Once you've setup a PayPal account, you'll need to obtain a **Client ID** and **
 These examples will ask you to run commands like `npm install` and `npm start`.
 
 You'll need a version of node >= 14 which can be downloaded from the [Node.js website](https://nodejs.org/en/download/).
+
+## PayPal Codespaces
+
+PayPal codespaces require a client ID and client secret for your app.
+
+### Link to codespaces 
+
+[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/paypal-examples/googlepay)
+
+### Learn more 
+
+You can read more about codespaces in the [PayPal Developer Docs](https://developer.paypal.com/api/rest/sandbox/codespaces).
+
+### Feedback 
+
+* To report a bug or suggest a new feature, create an [issue in GitHub](https://github.com/paypal-examples/paypaldevsupport/issues/new/choose). 
+* To submit feedback, go to [GitHub Codespaces](https://developer.paypal.com/api/rest/sandbox/codespaces) and select the "Feedback" tab
