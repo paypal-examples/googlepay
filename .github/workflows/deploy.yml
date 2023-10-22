@@ -21,13 +21,13 @@ jobs:
           dontuseforce: false
           docker_build_args: |
             NODE_ENV
-            CLIENT_ID
-            APP_SECRET
-            MERCHANT_ID
+            PAYPAL_CLIENT_ID
+            PAYPAL_CLIENT_SECRET
+            PAYPAL_MERCHANT_ID
             BASE_URL
         env:
           NODE_ENV: ${{secrets.NODE_ENV}}
-          CLIENT_ID: ${{secrets.CLIENT_ID}}
-          APP_SECRET: ${{secrets.APP_SECRET}}
-          MERCHANT_ID: ${{secrets.MERCHANT_ID}}
+          PAYPAL_CLIENT_ID: ${{secrets.CLIENT_ID}}
+          PAYPAL_CLIENT_SECRET: ${{secrets.APP_SECRET}}
+          PAYPAL_MERCHANT_ID: ${{secrets.MERCHANT_ID}}
           BASE_URL: ${{secrets.BASE_URL}}
