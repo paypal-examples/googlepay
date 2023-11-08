@@ -9,8 +9,8 @@ app.use(express.static("public"));
 
 // render checkout page with client id & unique client token
 app.get("/", async (req, res) => {
-  const clientId = process.env.CLIENT_ID, merchantId = process.env.MERCHANT_ID;
-  const clientSecret = process.env.APP_SECRET;
+  const clientId = process.env.PAYPAL_CLIENT_ID, merchantId = process.env.PAYPAL_MERCHANT_ID;
+  const clientSecret = process.env.PAYPAL_CLIENT_SECRET;
   try {
     if (!clientId || !merchantId ||  !clientSecret){
       throw new Error("Client Id or App Secret or Merchant Id is missing.");
@@ -59,9 +59,6 @@ app.get("/check" ,(req,res) => {
   res.json({
     message: "ok",
     env: process.env.NODE_ENV, 
-    clientId: process.env.CLIENT_ID,
-    appSecret: process.env.APP_SECRET || "Couldn't load App Secret",
-    merchantId: process.env.MERCHANT_ID,
     baseUrl: process.env.BASE_URL
   })
 })
