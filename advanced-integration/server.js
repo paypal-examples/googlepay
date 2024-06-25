@@ -1,18 +1,21 @@
 import "dotenv/config";
 import express from "express";
 import * as paypal from "./paypal-api.js";
+//require('dotenv').config(); //dani 25 giu
 const {PORT = 8888} = process.env;
 
 const app = express();
-app.set("view engine", "ejs");
+app.set("view engine", "ejs"); //if "view engine" is not set "ejs" is the default
 app.use(express.static("public"));
 
 // render checkout page with client id & unique client token
 app.get("/", async (req, res) => {
-  const clientId = process.env.PAYPAL_CLIENT_ID, merchantId = process.env.PAYPAL_MERCHANT_ID;
+  const clientId = process.env.PAYPAL_CLIENT_ID
+  const merchantId = process.env.PAYPAL_MERCHANT_ID; //testare
   const clientSecret = process.env.PAYPAL_CLIENT_SECRET;
+  const mymerchantId = process.env.PAYPAL_MERCHANT_ID;
   try {
-    if (!clientId || !merchantId ||  !clientSecret){
+    if (!clientId || !mymerchantId ||  !clientSecret){
       throw new Error("Client Id or App Secret or Merchant Id is missing.");
     }
     const clientToken = await paypal.generateClientToken();

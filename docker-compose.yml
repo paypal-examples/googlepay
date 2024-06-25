@@ -1,0 +1,8 @@
+version: '3.4'
+
+services:
+  googlepay:
+    image: googlepay
+    build:
+      context: .
+      dockerfile: ./Dockerfile
