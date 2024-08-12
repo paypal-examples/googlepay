@@ -1,6 +1,6 @@
 # PayPal Googlepay Example Code
 
-Examples from the official [PayPal Developer Docs](https://developer.paypal.com/).
+Forked examples from the official [PayPal Developer Docs](https://developer.paypal.com/).
 
 ## Introduction and Overview
 
