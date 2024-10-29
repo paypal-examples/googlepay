@@ -10,6 +10,9 @@
  */
 let paymentsClient = null, googlepayConfig = null;
 
+const ENV = 'TEST';
+const API_PATH = '/api/orders';
+
 
 /**
  * 
@@ -31,7 +34,7 @@ async function getGooglePayConfig(){
  * @returns {object} PaymentDataRequest fields
  */
 async function getGooglePaymentDataRequest() {
-  const {allowedPaymentMethods,merchantInfo, apiVersion, apiVersionMinor , countryCode} = await getGooglePayConfig();
+  const {allowedPaymentMethods, merchantInfo, apiVersion, apiVersionMinor, countryCode} = await getGooglePayConfig();
   const baseRequest = {
     apiVersion,
     apiVersionMinor
@@ -78,7 +81,7 @@ async function getGooglePaymentDataRequest() {
 function getGooglePaymentsClient() {
   if (paymentsClient === null) {
     paymentsClient = new google.payments.api.PaymentsClient({
-      environment: 'TEST',
+      environment: ENV,
       paymentDataCallbacks: {
         onPaymentAuthorized: onPaymentAuthorized
       }
@@ -174,7 +177,7 @@ async function processPayment(paymentData) {
   const modal = document.getElementById("resultModal");
   resultElement.innerHTML = ""
   try {  
-    const { id } = await fetch(`/api/orders`,{
+    const { id } = await fetch(`${API_PATH}`,{
       method:'POST',
       headers : {
         'Content-Type': 'application/json'
@@ -196,7 +199,7 @@ async function processPayment(paymentData) {
                 /**
                  *  GET Order 
                  */
-                const orderResponse = await fetch(`/api/orders/${id}`, {
+                const orderResponse = await fetch(`${API_PATH}/${id}`, {
                   method: "GET"
                 }).then(res =>res.json())
 
@@ -226,7 +229,7 @@ async function processPayment(paymentData) {
          * CAPTURE THE ORDER
          */
         
-        const response = await fetch(`/api/orders/${id}/capture`, {
+        const response = await fetch(`${API_PATH}/${id}/capture`, {
                   method: "POST"
         }).then(res =>res.json())
 
