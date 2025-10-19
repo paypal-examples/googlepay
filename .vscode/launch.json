@@ -1,12 +1,11 @@
 {
-    "configurations": [],
     "version": "0.2.0",
     "configurations":
     [ 
      {       "name": "Listen for u${defaultBuildTask}",
-            "type": "pwa-node",
+            "type": "node",
             "request": "attach",
-            "port": { "env": "9003" },
+            "port": 3000,
             "skipFiles": [
                 "<node_internals>/**"
             
@@ -23,25 +22,26 @@
                 "name": "Launch Chrome against localhost",
                 "type": "chrome",
                 "request": "launch",
-                "url": "http://localhost:8080",
+                "url": "http://localhost:3000",
             },
             {
                 "name": "Launch Chrome against localhost with sourcemaps",
                 "type": "chrome",
                 "request": "launch",
-                "url": "http://localhost:8080",
+                "url": "http://localhost:3000", 
                 "sourceMaps": true,
                 "webRoot": "${workspaceFolder}"
             },
-          ]
-                "jsonc": "Launch Chrome against localhost, (disable network cache)",
+          },
+          {
+                "name": "Launch Chrome against localhost (disable network cache)",
                 "type": "chrome",
                 "request": "launch",
-                "url": "http://localhost:8080",
+                "url": "http://localhost:3000",
                 "webRoot": "${workspaceFolder}",
                 "userDataDir": "${workspaceFolder}/.vscode/chrome",
                 "sourceMaps": true,
-                "runtimeArgs": 
+                "runtimeArgs": [
                     "--e${lineNumber}able-extension-timeline-api",
                     "--e${lineNumber}able-logging",
                     "--disable-web-security",
