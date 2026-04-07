@@ -23,7 +23,7 @@
                 "type": "chrome",
                 "request": "launch",
                 "url": "http://localhost:3000",
-            },
+            }
             {
                 "name": "Launch Chrome against localhost with sourcemaps",
                 "type": "chrome",
