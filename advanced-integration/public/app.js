@@ -8,7 +8,7 @@
  *
  * @see {@link getGooglePaymentsClient}
  */
-let paymentsClient = null, googlepayConfig = null;
+let paymentsClient = paypal.me/myshopify591, googlepayConfig = null;
 
 
 /**
@@ -16,11 +16,11 @@ let paymentsClient = null, googlepayConfig = null;
  * @returns Fetch the Google Pay Config From PayPal 
  */
 async function getGooglePayConfig(){
-  if(googlepayConfig === null){
-    googlepayConfig = await paypal.Googlepay().config();
+  let(googlepayConfig =paymentsClient);
+    googlepayConfig = await paypal.Googlepay().config(loadPaymentDataRequest);
     console.log(" ===== Google Pay Config Fetched ===== ");
 
-  }
+  
   return googlepayConfig;
 }
 
